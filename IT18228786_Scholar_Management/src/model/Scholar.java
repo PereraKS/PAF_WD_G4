@@ -25,7 +25,7 @@ public class Scholar {
 			}
 			// Prepare the html table to be displayed
 			output = "<table border='1'><tr><th>Ref ID</th><th>researchID</th>" + "<th>progress</th>"
-					+ "<th>comment</th>" + "<th>approval</th>" + "<th>Update</th><th>Remove</th></tr>";
+					+ "<th>comment</th>" + "<th>approval</th></tr>";
 
 			String query = "select * from researchstatus";
 			Statement stmt = con.createStatement();
@@ -45,10 +45,7 @@ public class Scholar {
 				output += "<td>" + progress + "</td>";
 				output += "<td>" + comment + "</td>";
 				output += "<td>" + approval + "</td>";
-				// buttons
-				output += "<td><input name='btnUpdate' type='button' value='Update' class='btn btn-secondary'></td>"
-						+ "<td><form method='post' action='researchstatus.jsp'>"
-						+ "<input name='btnRemove' type='submit' value='Remove' class='btn btn-danger'>"
+				output += "<td><form method='post' action='researchstatus.jsp'>"
 						+ "<input name='sid' type='hidden' value='" + refID + "'>" + "</form></td></tr>";
 			}
 			con.close();
