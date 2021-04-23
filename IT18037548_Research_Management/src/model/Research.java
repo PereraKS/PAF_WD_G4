@@ -1,25 +1,26 @@
 package model;
 
 import java.sql.*;
+import util.DataBase;
 
 public class Research {
 
-	private Connection connect() {
-		Connection con = null;
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			con = DriverManager.getConnection(
-					"jdbc:mysql://127.0.0.1:3306/gadgetbadgetdb?useTimezone=true&serverTimezone=UTC", "root", "");
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-		return con;
-	}
+//	private Connection connect() {
+//		Connection con = null;
+//		try {
+//			Class.forName("com.mysql.cj.jdbc.Driver");
+//			con = DriverManager.getConnection(
+//					"jdbc:mysql://127.0.0.1:3306/gadgetbadgetdb?useTimezone=true&serverTimezone=UTC", "root", "");
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//		return con;
+//	}
 
 	public String readResearch() {
 		String output = "";
 		try {
-			Connection con = connect();
+			Connection con = DataBase.connect();
 			if (con == null) {
 				return "Error while connecting to the database for reading.";
 			}
@@ -78,7 +79,7 @@ public class Research {
 			String resercherEmail) {
 		String output = "";
 		try {
-			Connection con = connect();
+			Connection con = DataBase.connect();
 			if (con == null) {
 				return "Error while connecting to the database for inserting.";
 			}
@@ -113,7 +114,7 @@ public class Research {
 			String estimateBudget, String resercherName, String resercherEmail) {
 		String output = "";
 		try {
-			Connection con = connect();
+			Connection con = DataBase.connect();
 			if (con == null) {
 				return "Error while connecting to the database for updating.";
 			}
@@ -143,12 +144,12 @@ public class Research {
 	public String deleteResearch(String id) {
 		String output = "";
 		try {
-			Connection con = connect();
+			Connection con = DataBase.connect();
 			if (con == null) {
 				return "Error while connecting to the database for deleting.";
 			}
 			// create a prepared statement
-			String query = "delete from research where itemID=?";
+			String query = "delete from research where id=?";
 			PreparedStatement preparedStmt = con.prepareStatement(query);
 			// binding values
 			preparedStmt.setInt(1, Integer.parseInt(id));
