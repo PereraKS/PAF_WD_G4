@@ -15,8 +15,8 @@ import org.jsoup.nodes.Document;
 @Path("/Scholars")
 
 public class Scholar_Services {
-	
-	Scholar scholar =  new Scholar();
+
+	Scholar scholar = new Scholar();
 
 	@GET
 	@Path("/")
@@ -24,15 +24,13 @@ public class Scholar_Services {
 	public String readresearchstatus() {
 		return scholar.readresearchstatus();
 	}
-	
-	
+
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertresearchstatus(@FormParam("researchID") String researchID,
-			@FormParam("progress") String progress,
-			@FormParam("comment") String comment,
+			@FormParam("progress") String progress, @FormParam("comment") String comment,
 			@FormParam("approval") String approval) {
 		String output = scholar.insertresearchstatus(researchID, progress, comment, approval);
 		return output;
@@ -68,5 +66,5 @@ public class Scholar_Services {
 		String output = scholar.deleteresearchstatus(refid);
 		return output;
 	}
-	
+
 }
