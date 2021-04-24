@@ -11,10 +11,15 @@ import org.jsoup.*;
 import org.jsoup.parser.*;
 import org.jsoup.nodes.Document;
 
+import java.time.LocalDate;
+
 @Path("/Research")
 public class ResearchManagementService {
 	Research research = new Research();
 
+	LocalDate date= java.time.LocalDate.now();
+	String Today= date+"";
+	
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_HTML)
@@ -28,10 +33,10 @@ public class ResearchManagementService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertResearch(@FormParam("title") String title, @FormParam("category") String category,
 			@FormParam("description") String description, @FormParam("progress") String progress,
-			@FormParam("estimateBudget") String estimateBudget, @FormParam("addedDate") String addedDate,
+			@FormParam("estimateBudget") String estimateBudget,
 			@FormParam("approvalStatus") String approvalStatus, @FormParam("resercherName") String resercherName,
 			@FormParam("resercherEmail") String resercherEmail) {
-		String output = research.insertResearch(title, category, description, progress, estimateBudget, addedDate,
+		String output = research.insertResearch(title, category, description, progress, estimateBudget, Today,
 				approvalStatus, resercherName, resercherEmail);
 		return output;
 	}
@@ -67,7 +72,8 @@ public class ResearchManagementService {
 		Document doc = Jsoup.parse(ResearchData, "", Parser.xmlParser());
 
 		String id = doc.select("id").text();
-		String output = research.deleteResearch(id);
+		String forceDelete = doc.select("forceDelete").text(); 
+		String output = research.deleteResearch(id,forceDelete);
 		return output;
 	}
 }

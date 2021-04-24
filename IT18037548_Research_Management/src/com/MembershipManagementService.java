@@ -12,6 +12,7 @@ import org.jsoup.*;
 import org.jsoup.parser.*;
 import org.jsoup.nodes.Document;
 
+@Path("/Membership")
 public class MembershipManagementService {
 	
 	MembershipLevels levels = new MembershipLevels();

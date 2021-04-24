@@ -2,9 +2,9 @@ package model;
 
 import java.sql.*;
 import util.DataBase;
+//import model.ResearchApprovalStatus;
 
 public class Research {
-
 
 	public String readResearch() {
 		String output = "";
@@ -18,9 +18,9 @@ public class Research {
 					+ "<th>description</th>" + "<th>progress</th>" + "<th>estimateBudget</th>" + "<th>addedDate</th>"
 					+ "<th>approvalStatus</th>" + "<th>resercherName</th>" + "<th>resercherEmail</th>";
 
-			String category="";
-			String approvalStatus="";
-			
+			String category = "";
+			String approvalStatus = "";
+
 			String query = "select * from research";
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -29,8 +29,10 @@ public class Research {
 			while (rs.next()) {
 				String id = Integer.toString(rs.getInt("id"));
 				String title = rs.getString("title");
-				//To get category name from category table 
-				String queryforcategory = "select categoryName from researchcategory WHERE categoryID = "+ rs.getString("category");
+
+				// To get category name from category table
+				String queryforcategory = "select categoryName from researchcategory WHERE categoryID = "
+						+ rs.getString("category");
 				Statement stmt1 = con.createStatement();
 				ResultSet rs1 = stmt1.executeQuery(queryforcategory);
 				while (rs1.next()) {
@@ -40,19 +42,18 @@ public class Research {
 				String progress = Integer.toString(rs.getInt("progress"));
 				String estimateBudget = Double.toString(rs.getDouble("estimateBudget"));
 				String addedDate = rs.getString("addedDate");
-				
-				String queryforapprovalStatus = "SELECT approval FROM researchstatus WHERE researchID ="+ id;
+
+				// To get Approval Status from Approval table
+				String queryforapprovalStatus = "SELECT approval FROM researchstatus WHERE researchID =" + id;
 				Statement stmt2 = con.createStatement();
 				ResultSet rs2 = stmt2.executeQuery(queryforapprovalStatus);
 				while (rs2.next()) {
 					approvalStatus = rs2.getString("approval");
 				}
-				
-//				String approvalStatus = rs.getString("approvalStatus");
+
 				String resercherName = rs.getString("resercherName");
 				String resercherEmail = rs.getString("resercherEmail");
-				// Add into the html table
-				
+
 				output += "<tr><td>" + id + "</td>";
 				output += "<td>" + title + "</td>";
 				output += "<td>" + category + "</td>";
@@ -75,42 +76,12 @@ public class Research {
 		return output;
 	}
 
-	//Send for Approval
-	public String insertToApproval(String id,String progress,String approvalStatus) {
-		String output = "";
-		try {
-			Connection con = DataBase.connect();
-			if (con == null) {
-				return "Error while connecting to the database for inserting.";
-			}
-			// create a prepared statement
-			String query = " insert into researchstatus (`approvalid`, `researchID`, `progress`, `approval`)"
-					+ " values (?, ?, ?, ?)";
-			PreparedStatement preparedStmt = con.prepareStatement(query);
-			// binding values
-			preparedStmt.setInt(1, 0);
-			preparedStmt.setInt(2, Integer.parseInt(id));
-			preparedStmt.setInt(3, Integer.parseInt(progress));
-			preparedStmt.setString(4, approvalStatus);
-
-			// execute the statement
-			preparedStmt.execute();
-			con.close();
-			output = "Sent for Approval";
-		} catch (Exception e) {
-			output = "Error while inserting";
-			System.err.println(e.getMessage());
-		}
-		return output;
-		
-	}
-	
 	public String insertResearch(String title, String category, String description, String progress,
 			String estimateBudget, String addedDate, String approvalStatus, String resercherName,
 			String resercherEmail) {
 		String output = "";
-		String RID="";
-		
+		String RID = "";
+
 		try {
 			Connection con = DataBase.connect();
 			if (con == null) {
@@ -140,32 +111,32 @@ public class Research {
 			output = "Error while inserting";
 			System.err.println(e.getMessage());
 		}
+
 		
-		
+		// getting l research id for send research to approval
 		try {
 			Connection con = DataBase.connect();
-			
-			String queryrsmax = "select id from research ORDER BY id DESC LIMIT 1";
+
+			String queryrsmax = "select id from research ORDER BY id DESC LIMIT 1"; 
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(queryrsmax);
 			while (rs.next()) {
 				RID = rs.getString("id");
 			}
-			
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		// to send research to approval
-		if(approvalStatus.equals("sendAP") ) {
-			insertToApproval(RID, progress, approvalStatus);
+
+		// send research to approval
+		if (approvalStatus.equals("sendAP")) {
+			ResearchApprovalStatus.insertToApproval(RID, progress, approvalStatus);
 		}
 		return output;
 	}
 
 	public String updateResearchData(String id, String title, String category, String description, String progress,
-			String estimateBudget,String approvalStatus, String resercherName, String resercherEmail) {
+			String estimateBudget, String approvalStatus, String resercherName, String resercherEmail) {
 		String output = "";
 		try {
 			Connection con = DataBase.connect();
@@ -193,36 +164,51 @@ public class Research {
 			output = "Error while updating";
 			System.err.println(e.getMessage());
 		}
-		
-		if(approvalStatus.equals("sendAP") ) {
-			insertToApproval(id, progress, approvalStatus);
+
+		// send research to approval
+		if (approvalStatus.equals("sendAP")) {
+			ResearchApprovalStatus.insertToApproval(id, progress, approvalStatus);
 		}
 		return output;
 	}
 
-	public String deleteResearch(String id) {
+	public String deleteResearch(String id, String force) {
 		String output = "";
-		try {
-			Connection con = DataBase.connect();
-			if (con == null) {
-				return "Error while connecting to the database for deleting.";
+		String CheckApprovalTable = "";
+
+		//Checking if an approved research is going to be deleted
+		CheckApprovalTable = ResearchApprovalStatus.checkApprovalTable(id);
+
+		if (CheckApprovalTable.equals("") || force.equals("forceDELETE")) {// if not approved or need force delete 
+
+			try {
+				Connection con = DataBase.connect();
+				if (con == null) {
+					return "Error while connecting to the database for deleting.";
+				}
+
+				// create a prepared statement
+				String query = "delete from research where id=?";
+				PreparedStatement preparedStmt = con.prepareStatement(query);
+				// binding values
+				preparedStmt.setInt(1, Integer.parseInt(id));
+				// execute the statement
+				preparedStmt.execute();
+				con.close();
+				output = "Deleted successfully";
+			} catch (Exception e) {
+				output = "Error while deleting";
+				System.err.println(e.getMessage());
 			}
-			// create a prepared statement
-			String query = "delete from research where id=?";
-			PreparedStatement preparedStmt = con.prepareStatement(query);
-			// binding values
-			preparedStmt.setInt(1, Integer.parseInt(id));
-			// execute the statement
-			preparedStmt.execute();
-			con.close();
-			output = "Deleted successfully";
-		} catch (Exception e) {
-			output = "Error while deleting";
-			System.err.println(e.getMessage());
+
+			//Delete research from Approval table
+			ResearchApprovalStatus.deleteResearchFromApproval(CheckApprovalTable);
+
+		} else {
+			output = "Youre Trying to Delete Approved Research ";
 		}
-		
+
 		return output;
 	}
 
-	
 }
