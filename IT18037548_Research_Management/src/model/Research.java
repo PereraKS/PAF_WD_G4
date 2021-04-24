@@ -106,18 +106,17 @@ public class Research {
 			// execute the statement
 			preparedStmt.execute();
 			con.close();
-			output = output + "Inserted successfully" + approvalStatus;
+			output = "Inserted successfully";
 		} catch (Exception e) {
 			output = "Error while inserting";
 			System.err.println(e.getMessage());
 		}
 
-		
 		// getting l research id for send research to approval
 		try {
 			Connection con = DataBase.connect();
 
-			String queryrsmax = "select id from research ORDER BY id DESC LIMIT 1"; 
+			String queryrsmax = "select id from research ORDER BY id DESC LIMIT 1";
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(queryrsmax);
 			while (rs.next()) {
@@ -176,10 +175,10 @@ public class Research {
 		String output = "";
 		String CheckApprovalTable = "";
 
-		//Checking if an approved research is going to be deleted
+		// Checking if an approved research is going to be deleted
 		CheckApprovalTable = ResearchApprovalStatus.checkApprovalTable(id);
 
-		if (CheckApprovalTable.equals("") || force.equals("forceDELETE")) {// if not approved or need force delete 
+		if (CheckApprovalTable.equals("") || force.equals("forceDELETE")) {// if not approved or need force delete
 
 			try {
 				Connection con = DataBase.connect();
@@ -201,7 +200,7 @@ public class Research {
 				System.err.println(e.getMessage());
 			}
 
-			//Delete research from Approval table
+			// Delete research from Approval table
 			ResearchApprovalStatus.deleteResearchFromApproval(CheckApprovalTable);
 
 		} else {

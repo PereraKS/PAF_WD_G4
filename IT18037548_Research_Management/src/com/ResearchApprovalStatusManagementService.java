@@ -9,7 +9,7 @@ import javax.ws.rs.core.MediaType;
 public class ResearchApprovalStatusManagementService {
 
 	ResearchApprovalStatus ApprovalStatus = new ResearchApprovalStatus();
-	
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_HTML)

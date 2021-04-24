@@ -17,9 +17,9 @@ import java.time.LocalDate;
 public class ResearchManagementService {
 	Research research = new Research();
 
-	LocalDate date= java.time.LocalDate.now();
-	String Today= date+"";
-	
+	LocalDate date = java.time.LocalDate.now();
+	String Today = date + "";
+
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_HTML)
@@ -33,9 +33,8 @@ public class ResearchManagementService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertResearch(@FormParam("title") String title, @FormParam("category") String category,
 			@FormParam("description") String description, @FormParam("progress") String progress,
-			@FormParam("estimateBudget") String estimateBudget,
-			@FormParam("approvalStatus") String approvalStatus, @FormParam("resercherName") String resercherName,
-			@FormParam("resercherEmail") String resercherEmail) {
+			@FormParam("estimateBudget") String estimateBudget, @FormParam("approvalStatus") String approvalStatus,
+			@FormParam("resercherName") String resercherName, @FormParam("resercherEmail") String resercherEmail) {
 		String output = research.insertResearch(title, category, description, progress, estimateBudget, Today,
 				approvalStatus, resercherName, resercherEmail);
 		return output;
@@ -59,7 +58,8 @@ public class ResearchManagementService {
 		String resercherName = ResearchDataObject.get("resercherName").getAsString();
 		String resercherEmail = ResearchDataObject.get("resercherEmail").getAsString();
 
-		String output = research.updateResearchData(id, title, category, description, progress, estimateBudget, approvalStatus, resercherName, resercherEmail);
+		String output = research.updateResearchData(id, title, category, description, progress, estimateBudget,
+				approvalStatus, resercherName, resercherEmail);
 		return output;
 	}
 
@@ -72,8 +72,8 @@ public class ResearchManagementService {
 		Document doc = Jsoup.parse(ResearchData, "", Parser.xmlParser());
 
 		String id = doc.select("id").text();
-		String forceDelete = doc.select("forceDelete").text(); 
-		String output = research.deleteResearch(id,forceDelete);
+		String forceDelete = doc.select("forceDelete").text(); // To delete Approved Research
+		String output = research.deleteResearch(id, forceDelete);
 		return output;
 	}
 }

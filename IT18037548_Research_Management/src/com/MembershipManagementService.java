@@ -14,25 +14,22 @@ import org.jsoup.nodes.Document;
 
 @Path("/Membership")
 public class MembershipManagementService {
-	
+
 	MembershipLevels levels = new MembershipLevels();
 
-	
 	@GET
 	@Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public String readMembershipLevels() {
 		return levels.readMembershipLevels();
 	}
-	
-	
+
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String insertMembershipLevels(@FormParam("membership_Name") String membership_Name,
-			@FormParam("pricing") String pricing,
-			@FormParam("benefits") String benefits,
+			@FormParam("pricing") String pricing, @FormParam("benefits") String benefits,
 			@FormParam("researchID") String researchID) {
 		String output = levels.insertMembershipLevels(membership_Name, pricing, benefits, researchID);
 		return output;
@@ -60,7 +57,7 @@ public class MembershipManagementService {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_XML)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String deleteResearchStatus(String MembershipLevelData) {
+	public String deleteMembershipLevels(String MembershipLevelData) {
 		// Convert the input string to an XML document
 		Document doc = Jsoup.parse(MembershipLevelData, "", Parser.xmlParser());
 
@@ -68,5 +65,5 @@ public class MembershipManagementService {
 		String output = levels.deleteMembershipLevels(id);
 		return output;
 	}
-	
+
 }

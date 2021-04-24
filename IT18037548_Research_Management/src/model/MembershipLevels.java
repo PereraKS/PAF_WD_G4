@@ -5,7 +5,6 @@ import util.DataBase;
 
 public class MembershipLevels {
 
-	
 	public String readMembershipLevels() {
 		String output = "";
 		try {
@@ -14,8 +13,8 @@ public class MembershipLevels {
 				return "Error while connecting to the database for reading.";
 			}
 			// Prepare the html table to be displayed
-			output = "<table border='1'><tr><th>Membership_Name</th>" + "<th>Pricing</th>"
-					+ "<th>Benefits</th>" + "<th>ResearchID</th>" ;
+			output = "<table border='1'><tr><th>Membership_Name</th>" + "<th>Pricing</th>" + "<th>Benefits</th>"
+					+ "<th>ResearchID</th></tr>";
 
 			String query = "select * from membershiplevels";
 			Statement stmt = con.createStatement();
@@ -23,18 +22,16 @@ public class MembershipLevels {
 			// iterate through the rows in the result set
 
 			while (rs.next()) {
-				String id = Integer.toString(rs.getInt("id"));
 				String membership_Name = rs.getString("membership_Name");
-				String pricing = Double.toString(rs.getDouble("progress"));
+				String pricing = Double.toString(rs.getDouble("pricing"));
 				String benefits = rs.getString("benefits");
 				String researchID = Integer.toString(rs.getInt("researchID"));
 				// Add into the html table
-				output += "<td>" + id + "</td>";
-				output += "<td>" + membership_Name + "</td>";
+				output += "<tr><td>" + membership_Name + "</td>";
 				output += "<td>" + pricing + "</td>";
 				output += "<td>" + benefits + "</td>";
-				output += "<td>" + researchID + "</td>";
-				
+				output += "<td>" + researchID + "</td></tr>";
+
 			}
 			con.close();
 			// Complete the html table
@@ -74,7 +71,8 @@ public class MembershipLevels {
 		return output;
 	}
 
-	public String updateMembershipLevels(String id,String membership_Name, String pricing, String benefits, String researchID) {
+	public String updateMembershipLevels(String id, String membership_Name, String pricing, String benefits,
+			String researchID) {
 		String output = "";
 		try {
 			Connection con = DataBase.connect();
@@ -109,7 +107,7 @@ public class MembershipLevels {
 				return "Error while connecting to the database for deleting.";
 			}
 			// create a prepared statement
-			String query = "delete from membershiplevels where refID=?";
+			String query = "delete from membershiplevels where id=?";
 			PreparedStatement preparedStmt = con.prepareStatement(query);
 			// binding values
 			preparedStmt.setInt(1, Integer.parseInt(id));
