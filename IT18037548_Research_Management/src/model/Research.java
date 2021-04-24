@@ -5,17 +5,6 @@ import util.DataBase;
 
 public class Research {
 
-//	private Connection connect() {
-//		Connection con = null;
-//		try {
-//			Class.forName("com.mysql.cj.jdbc.Driver");
-//			con = DriverManager.getConnection(
-//					"jdbc:mysql://127.0.0.1:3306/gadgetbadgetdb?useTimezone=true&serverTimezone=UTC", "root", "");
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//		}
-//		return con;
-//	}
 
 	public String readResearch() {
 		String output = "";
@@ -27,10 +16,11 @@ public class Research {
 			// Prepare the html table to be displayed
 			output = "<table border='1'>" + "<tr><th>RID</th>" + "<th>Title</th>" + "<th>Category</th>"
 					+ "<th>description</th>" + "<th>progress</th>" + "<th>estimateBudget</th>" + "<th>addedDate</th>"
-					+ "<th>approvalStatus</th>" + "<th>resercherName</th>" + "<th>resercherEmail</th>"
+					+ "<th>approvalStatus</th>" + "<th>resercherName</th>" + "<th>resercherEmail</th>";
 
-					+ "<th>Update</th>" + "<th>Remove</th></tr>";
-
+			String category="";
+			String approvalStatus="";
+			
 			String query = "select * from research";
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -39,15 +29,30 @@ public class Research {
 			while (rs.next()) {
 				String id = Integer.toString(rs.getInt("id"));
 				String title = rs.getString("title");
-				String category = rs.getString("category");
+				//To get category name from category table 
+				String queryforcategory = "select categoryName from researchcategory WHERE categoryID = "+ rs.getString("category");
+				Statement stmt1 = con.createStatement();
+				ResultSet rs1 = stmt1.executeQuery(queryforcategory);
+				while (rs1.next()) {
+					category = rs1.getString("categoryName");
+				}
 				String description = rs.getString("description");
 				String progress = Integer.toString(rs.getInt("progress"));
 				String estimateBudget = Double.toString(rs.getDouble("estimateBudget"));
 				String addedDate = rs.getString("addedDate");
-				String approvalStatus = rs.getString("approvalStatus");
+				
+				String queryforapprovalStatus = "SELECT approval FROM researchstatus WHERE researchID ="+ id;
+				Statement stmt2 = con.createStatement();
+				ResultSet rs2 = stmt2.executeQuery(queryforapprovalStatus);
+				while (rs2.next()) {
+					approvalStatus = rs2.getString("approval");
+				}
+				
+//				String approvalStatus = rs.getString("approvalStatus");
 				String resercherName = rs.getString("resercherName");
 				String resercherEmail = rs.getString("resercherEmail");
 				// Add into the html table
+				
 				output += "<tr><td>" + id + "</td>";
 				output += "<td>" + title + "</td>";
 				output += "<td>" + category + "</td>";
@@ -57,13 +62,9 @@ public class Research {
 				output += "<td>" + addedDate + "</td>";
 				output += "<td>" + approvalStatus + "</td>";
 				output += "<td>" + resercherName + "</td>";
-				output += "<td>" + resercherEmail + "</td>";
-				// buttons
-				output += "<td><input name='btnUpdate' type='button' value='Update' class='btn btn-secondary'></td>"
-						+ "<td><form method='post' action='research.jsp'>"
-						+ "<input name='btnRemove' type='submit' value='Remove' class='btn btn-danger'>"
-						+ "<input name='itemID' type='hidden' value='" + id + "'>" + "</form></td></tr>";
+				output += "<td>" + resercherEmail + "</td></tr>";
 			}
+
 			con.close();
 			// Complete the html table
 			output += "</table>";
@@ -74,10 +75,42 @@ public class Research {
 		return output;
 	}
 
+	//Send for Approval
+	public String insertToApproval(String id,String progress,String approvalStatus) {
+		String output = "";
+		try {
+			Connection con = DataBase.connect();
+			if (con == null) {
+				return "Error while connecting to the database for inserting.";
+			}
+			// create a prepared statement
+			String query = " insert into researchstatus (`approvalid`, `researchID`, `progress`, `approval`)"
+					+ " values (?, ?, ?, ?)";
+			PreparedStatement preparedStmt = con.prepareStatement(query);
+			// binding values
+			preparedStmt.setInt(1, 0);
+			preparedStmt.setInt(2, Integer.parseInt(id));
+			preparedStmt.setInt(3, Integer.parseInt(progress));
+			preparedStmt.setString(4, approvalStatus);
+
+			// execute the statement
+			preparedStmt.execute();
+			con.close();
+			output = "Sent for Approval";
+		} catch (Exception e) {
+			output = "Error while inserting";
+			System.err.println(e.getMessage());
+		}
+		return output;
+		
+	}
+	
 	public String insertResearch(String title, String category, String description, String progress,
 			String estimateBudget, String addedDate, String approvalStatus, String resercherName,
 			String resercherEmail) {
 		String output = "";
+		String RID="";
+		
 		try {
 			Connection con = DataBase.connect();
 			if (con == null) {
@@ -102,16 +135,37 @@ public class Research {
 			// execute the statement
 			preparedStmt.execute();
 			con.close();
-			output = "Inserted successfully";
+			output = output + "Inserted successfully" + approvalStatus;
 		} catch (Exception e) {
 			output = "Error while inserting";
 			System.err.println(e.getMessage());
+		}
+		
+		
+		try {
+			Connection con = DataBase.connect();
+			
+			String queryrsmax = "select id from research ORDER BY id DESC LIMIT 1";
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery(queryrsmax);
+			while (rs.next()) {
+				RID = rs.getString("id");
+			}
+			
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		// to send research to approval
+		if(approvalStatus.equals("sendAP") ) {
+			insertToApproval(RID, progress, approvalStatus);
 		}
 		return output;
 	}
 
 	public String updateResearchData(String id, String title, String category, String description, String progress,
-			String estimateBudget, String resercherName, String resercherEmail) {
+			String estimateBudget,String approvalStatus, String resercherName, String resercherEmail) {
 		String output = "";
 		try {
 			Connection con = DataBase.connect();
@@ -119,7 +173,7 @@ public class Research {
 				return "Error while connecting to the database for updating.";
 			}
 			// create a prepared statement
-			String query = "UPDATE research SET title=?,category=?,description=?,progress=?,estimateBudget=?,resercherName=?,resercherEmail=? WHERE id=?";
+			String query = "UPDATE research SET title=?,category=?,description=?,progress=?,estimateBudget=?,approvalStatus=?,resercherName=?,resercherEmail=? WHERE id=?";
 			PreparedStatement preparedStmt = con.prepareStatement(query);
 			// binding values
 			preparedStmt.setString(1, title);
@@ -127,9 +181,10 @@ public class Research {
 			preparedStmt.setString(3, description);
 			preparedStmt.setInt(4, Integer.parseInt(progress));
 			preparedStmt.setDouble(5, Double.parseDouble(estimateBudget));
-			preparedStmt.setString(6, resercherName);
-			preparedStmt.setString(7, resercherEmail);
-			preparedStmt.setInt(8, Integer.parseInt(id));
+			preparedStmt.setString(6, approvalStatus);
+			preparedStmt.setString(7, resercherName);
+			preparedStmt.setString(8, resercherEmail);
+			preparedStmt.setInt(9, Integer.parseInt(id));
 			// execute the statement
 			preparedStmt.execute();
 			con.close();
@@ -137,6 +192,10 @@ public class Research {
 		} catch (Exception e) {
 			output = "Error while updating";
 			System.err.println(e.getMessage());
+		}
+		
+		if(approvalStatus.equals("sendAP") ) {
+			insertToApproval(id, progress, approvalStatus);
 		}
 		return output;
 	}
@@ -161,7 +220,9 @@ public class Research {
 			output = "Error while deleting";
 			System.err.println(e.getMessage());
 		}
+		
 		return output;
 	}
 
+	
 }

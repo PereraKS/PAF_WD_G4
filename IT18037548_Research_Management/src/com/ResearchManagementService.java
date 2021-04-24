@@ -50,11 +50,11 @@ public class ResearchManagementService {
 		String description = ResearchDataObject.get("description").getAsString();
 		String progress = ResearchDataObject.get("progress").getAsString();
 		String estimateBudget = ResearchDataObject.get("estimateBudget").getAsString();
+		String approvalStatus = ResearchDataObject.get("approvalStatus").getAsString();
 		String resercherName = ResearchDataObject.get("resercherName").getAsString();
 		String resercherEmail = ResearchDataObject.get("resercherEmail").getAsString();
 
-		String output = research.updateResearchData(id, title, category, description, progress, estimateBudget,
-				resercherName, resercherEmail);
+		String output = research.updateResearchData(id, title, category, description, progress, estimateBudget, approvalStatus, resercherName, resercherEmail);
 		return output;
 	}
 
